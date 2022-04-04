@@ -3,7 +3,7 @@ const userRoutes = require("./src/routes/user")
 const itemRoutes = require("./src/routes/items")
 const app = express()
 const bodyParser = require('body-parser')
-const port = 3010
+const port = 3010 || process.env.PORT
 var cors = require('cors')
 
 
