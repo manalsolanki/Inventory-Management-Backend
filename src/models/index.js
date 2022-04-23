@@ -36,5 +36,5 @@ ItemsModel.hasMany(CurrentItemsModel, { as: "itemDetails", foreignKey: 'item_no'
 CurrentItemsModel.belongsTo(ItemsModel, { as: "itemDetails", foreignKey: 'item_no' });
 module.exports = {
   // UserModel
-  ItemsModel, PurchasedItemsModel, CurrentItemsModel
+  ItemsModel, PurchasedItemsModel, CurrentItemsModel, UserModel
 }

@@ -3,6 +3,8 @@ const { Sequelize } = require('sequelize');
 const { ItemsModel, PurchasedItemsModel, CurrentItemsModel } = require("../models")
 const router = express.Router();
 const Op = Sequelize.Op;
+const jwt = require("jsonwebtoken");
+const checkUser = require('../middleware/auth');
 
 const getItemList = (req, res) => {
     let condition = { item_name: { [Op.like]: `tomato%` } };
@@ -24,11 +26,15 @@ const getPurchasedItemList = (req, res) => {
     })
 }
 const getAllCurrentItem = (req, res) => {
+
     CurrentItemsModel.findAll({ include: [{ model: ItemsModel, as: 'itemDetails' }], order: [['id', 'ASC']] }).then(items => {
         res.send({ success: true, items })
     }).catch(err => {
         res.status(500).send({ success: false, err })
     })
+
+
+
 }
 
 const addNewItem = (req, res) => {
@@ -107,9 +113,9 @@ const updateCurrentItem = (req, res) => {
         })
 }
 router.get("/", getItemList);
-router.get("/purchaseditem", getPurchasedItemList)
-router.get("/currentitems", getAllCurrentItem)
+router.get("/purchaseditem", checkUser, getPurchasedItemList)
+router.get("/currentitems", checkUser, getAllCurrentItem)
 router.post("/addnewitem", addNewItem)
-router.post("/addpurchaseditem", addPurchasedItem)
+router.post("/addpurchaseditem", checkUser, addPurchasedItem)
 router.post("/updatecurrentitem", updateCurrentItem)
 module.exports = router;

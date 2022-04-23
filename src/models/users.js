@@ -1,3 +1,5 @@
+const bcrypt = require("bcryptjs/dist/bcrypt")
+
 module.exports = (sequelize, DataTypes) => {
   const UserModel = sequelize.define("user", {
     id: {
@@ -5,17 +7,28 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true
     },
-    name: {
+    first_name: {
       type: DataTypes.STRING(50),
       allowNull: false
     },
-    address: {
+    last_name: {
+      type: DataTypes.STRING(50),
+      allowNull: false
+    },
+    email: {
       type: DataTypes.STRING(255),
-      allowNull: true
+      allowNull: false
+    },
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: false
     },
   }, {
-    tableName: "user",
+    tableName: "inventory_user",
     timestamps: false
   })
+
+
   return UserModel
 }
+
