@@ -23,7 +23,7 @@ const loginUser = (req, res) => {
         .then((isMatched) => {
           if (isMatched) {
             const token = jwt.sign({ userEmail: req.body.userEmail }, 'manal');
-            res.send({ success: true, token });
+            res.send({ success: true, token, userId: user.dataValues.id });
           }
           else {
             res.status(404).send({ success: false, message: " Please check the email or Password." })

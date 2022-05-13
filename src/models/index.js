@@ -34,6 +34,12 @@ PurchasedItemsModel.belongsTo(ItemsModel, { as: "itemDetail", foreignKey: 'item_
 
 ItemsModel.hasMany(CurrentItemsModel, { as: "itemDetails", foreignKey: 'item_no' });
 CurrentItemsModel.belongsTo(ItemsModel, { as: "itemDetails", foreignKey: 'item_no' });
+
+UserModel.hasMany(PurchasedItemsModel, { as: "userDetail", foreignKey: 'user_id' });
+PurchasedItemsModel.belongsTo(UserModel, { as: "userDetail", foreignKey: 'user_id' });
+
+UserModel.hasMany(CurrentItemsModel, { as: "userInfo", foreignKey: 'user_id' });
+CurrentItemsModel.belongsTo(UserModel, { as: "userInfo", foreignKey: 'user_id' });
 module.exports = {
   // UserModel
   ItemsModel, PurchasedItemsModel, CurrentItemsModel, UserModel

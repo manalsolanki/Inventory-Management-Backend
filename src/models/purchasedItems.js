@@ -7,8 +7,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         item_no: {
             type: DataTypes.INTEGER,
-            allowNull: false,
-
+            allowNull: false
         },
         date_of_purchase: {
             type: DataTypes.DATE,
@@ -27,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         }
         ,
+        user_id: {
+             type: DataTypes.INTEGER,
+            allowNull: false
+        }
     }, {
         tableName: "purchased_item",
         timestamps: false

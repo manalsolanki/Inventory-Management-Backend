@@ -1,10 +1,11 @@
 const express = require("express");
 const { Sequelize } = require('sequelize');
-const { ItemsModel, PurchasedItemsModel, CurrentItemsModel } = require("../models")
+const { ItemsModel, PurchasedItemsModel, CurrentItemsModel, UserModel } = require("../models")
 const router = express.Router();
 const Op = Sequelize.Op;
 const jwt = require("jsonwebtoken");
 const checkUser = require('../middleware/auth');
+const { header } = require("express/lib/request");
 
 const getItemList = (req, res) => {
     let condition = { item_name: { [Op.like]: `tomato%` } };
@@ -18,23 +19,24 @@ const getItemList = (req, res) => {
 
 const getPurchasedItemList = (req, res) => {
     PurchasedItemsModel.findAll({
-        include: [{ model: ItemsModel, as: 'itemDetail' }], order: [['id', 'DESC']]
+        where: { user_id: req.header("UserId") },
+        include: [{ model: ItemsModel, as: 'itemDetail' }, { model: UserModel, as: 'userDetail' }], order: [['id', 'DESC']]
     }).then(items => {
         res.send({ success: true, items })
     }).catch(err => {
-        res.status(500).send({ success: false })
+        console.log(err)
+        res.status(500).send({ success: false, err })
     })
 }
 const getAllCurrentItem = (req, res) => {
-
-    CurrentItemsModel.findAll({ include: [{ model: ItemsModel, as: 'itemDetails' }], order: [['id', 'ASC']] }).then(items => {
+    CurrentItemsModel.findAll({
+        where: { user_id: req.header("UserId") },
+        include: [{ model: ItemsModel, as: 'itemDetails' }], order: [['id', 'ASC']]
+    }).then(items => {
         res.send({ success: true, items })
     }).catch(err => {
         res.status(500).send({ success: false, err })
     })
-
-
-
 }
 
 const addNewItem = (req, res) => {
@@ -51,7 +53,7 @@ const addNewItem = (req, res) => {
 }
 
 const addPurchasedItem = async (req, res) => {
-    let { item_no, date_of_purchase, units, quantity, price, item_name } = req.body;
+    let { item_no, date_of_purchase, units, quantity, price, item_name, user_id } = req.body;
     console.log(item_name)
     if (item_no === 0) {
         item_no = await ItemsModel.create({ item_name })
@@ -65,7 +67,7 @@ const addPurchasedItem = async (req, res) => {
                 });
             });
     }
-    const newItem = { item_no, date_of_purchase, quantity, units, price }
+    const newItem = { item_no, date_of_purchase, quantity, units, price, user_id }
     let insertedItem = await PurchasedItemsModel.create(newItem)
         .then(data => {
             res.send({ success: true, data });
@@ -77,7 +79,11 @@ const addPurchasedItem = async (req, res) => {
                     err.message || "Some error occurred while creating the Tutorial."
             });
         });
-    CurrentItemsModel.findOne({ include: [{ model: ItemsModel, as: 'itemDetails' }], where: { item_no: insertedItem.dataValues.item_no } }).then(items => {
+
+    CurrentItemsModel.findOne({
+        include: [{ model: ItemsModel, as: 'itemDetails' }],
+        where: { [Op.and]: [{ user_id: user_id }, { item_no: insertedItem.dataValues.item_no }] }
+    }).then(items => {
 
         if (items) {
             CurrentItemsModel.update({ quantity: items.dataValues.quantity + insertedItem.dataValues.quantity }, { where: { item_no: insertedItem.dataValues.item_no } })
@@ -87,7 +93,7 @@ const addPurchasedItem = async (req, res) => {
                     })
         }
         else {
-            const newCurrentItem = { item_no, quantity, Unit: units }
+            const newCurrentItem = { item_no, quantity, Unit: units, user_id }
             CurrentItemsModel.create(newCurrentItem)
                 .then(data => {
                     console.log(data)
